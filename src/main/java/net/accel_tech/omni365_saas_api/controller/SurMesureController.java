@@ -7,7 +7,7 @@ import net.accel_tech.omni365_saas_api.entity.SurmesureForm;
 import net.accel_tech.omni365_saas_api.exception.ResourceNotFoundException;
 import net.accel_tech.omni365_saas_api.message.Message;
 import net.accel_tech.omni365_saas_api.repository.SurMesureFormRepository;
-import net.accel_tech.omni365_saas_api.service.SurMesureEmailService;
+import net.accel_tech.omni365_saas_api.service.SurMesureFormService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,23 +26,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SurMesureController {
 
-    private final SurMesureEmailService surMesureEmailService;
+    private final SurMesureFormService surMesureFormService;
     private final SurMesureFormRepository surMesureFormRepository;
-
 
     /**
      * @url http://localhost:8080/api/surmesures
-     * @param
      * @return
      */
     @PostMapping("")
     public ResponseEntity<?> sendEmail(@Valid @RequestBody SurmesureForm surmesureForm) {
 
-        SurmesureForm savedForm = surMesureFormRepository.save(surmesureForm);
+        SurmesureForm processedForm = surMesureFormService.processSurMesureForm(surmesureForm);
 
-        surMesureEmailService.send(savedForm);
-
-        return new ResponseEntity<>(new Message("Demande sur mesure enregistrée et email envoyé avec succès"), HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        true,
+                        new Message("Demande sur mesure enregistrée et emails envoyés avec succès")),
+                HttpStatus.CREATED
+        );
     }
 
 

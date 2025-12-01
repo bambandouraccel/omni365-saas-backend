@@ -3,7 +3,8 @@ package net.accel_tech.omni365_saas_api.service;
 import jakarta.mail.Message;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import net.accel_tech.omni365_saas_api.entity.SurmesureForm;
+import lombok.RequiredArgsConstructor;
+import net.accel_tech.omni365_saas_api.entity.ParticularForm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,21 +19,18 @@ import org.springframework.stereotype.Service;
  **/
 
 @Service
-public class SurMesureEmailService {
+@RequiredArgsConstructor
+public class ParticularEmailService {
 
     Logger logger = LogManager.getLogger(SurMesureEmailService.class);
 
     private final JavaMailSender emailSender;
 
-    public SurMesureEmailService(JavaMailSender emailSender) {
-        this.emailSender = emailSender;
-    }
-
     @Value("${spring.mail.username}")
     private String emailTo;
 
     @Async
-    public void send(SurmesureForm surmesureForm) {
+    public void send(ParticularForm particularForm) {
 
         // prepare email format
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
@@ -40,11 +38,11 @@ public class SurMesureEmailService {
             @Override
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
-                mimeMessage.setSubject("Nouvelle Demande de Configuration sur mesure - " + surmesureForm.getEnterpriseName());
+                mimeMessage.setSubject("Nouvelle Demande de Configuration Particulier - " + particularForm.getLastName() + " " + particularForm.getFirstName());
 
                 MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-                String emailContent = buildEmailTemplate(surmesureForm);
+                String emailContent = buildEmailTemplate(particularForm);
                 helper.setText(emailContent, true);
             }
         };
@@ -58,7 +56,7 @@ public class SurMesureEmailService {
         }
     }
 
-    private String buildEmailTemplate(SurmesureForm surmesureForm) {
+    private String buildEmailTemplate(ParticularForm particularForm) {
         return "<!DOCTYPE html>" +
                 "<html lang=\"fr\">" +
                 "<head>" +
@@ -98,30 +96,30 @@ public class SurMesureEmailService {
                 "            <div class=\"info-grid\">" +
                 "                <div class=\"info-card\">" +
                 "                    <div class=\"info-label\">Expéditeur</div>" +
-                "                    <div class=\"info-value\">" + escapeHtml(surmesureForm.getFullName()) + "</div>" +
+                "                    <div class=\"info-value\">" + escapeHtml(particularForm.getFirstName()) + "</div>" +
+                "                </div>" +
+                "                <div class=\"info-card\">" +
+                "                    <div class=\"info-label\">Expéditeur</div>" +
+                "                    <div class=\"info-value\">" + escapeHtml(particularForm.getLastName()) + "</div>" +
                 "                </div>" +
                 "                <div class=\"info-card\">" +
                 "                    <div class=\"info-label\">Email</div>" +
-                "                    <div class=\"info-value\">" + escapeHtml(surmesureForm.getEmail()) + "</div>" +
+                "                    <div class=\"info-value\">" + escapeHtml(particularForm.getPersonalEmail()) + "</div>" +
                 "                </div>" +
                 "                <div class=\"info-card\">" +
                 "                    <div class=\"info-label\">Téléphone</div>" +
-                "                    <div class=\"info-value\">" + escapeHtml(surmesureForm.getPhoneNumber()) + "</div>" +
+                "                    <div class=\"info-value\">" + escapeHtml(particularForm.getPhoneNumber()) + "</div>" +
                 "                </div>" +
                 "                <div class=\"info-card\">" +
                 "                    <div class=\"info-label\">Entreprise</div>" +
-                "                    <div class=\"info-value\">" + escapeHtml(surmesureForm.getEnterpriseName()) + "</div>" +
-                "                </div>" +
-                "                <div class=\"info-card\">" +
-                "                    <div class=\"info-label\">Nombre de comptes</div>" +
-                "                    <div class=\"info-value\">" + surmesureForm.getAccountNumber() + "</div>" +
+                "                    <div class=\"info-value\">" + escapeHtml(particularForm.getNameAccount()) + "</div>" +
                 "                </div>" +
                 "            </div>" +
                 "            " +
                 "            " +
                 "            <div class=\"message-section\">" +
                 "                <div class=\"message-label\">MESSAGE</div>" +
-                "                <div class=\"message-content\">" + escapeHtml(surmesureForm.getMessage()) + "</div>" +
+                "                <div class=\"message-content\">" + escapeHtml(particularForm.getMessage()) + "</div>" +
                 "            </div>" +
                 "        </div>" +
                 "        <div class=\"footer\">" +
@@ -134,30 +132,30 @@ public class SurMesureEmailService {
     }
 
     @Async
-    public void sendConfirmationEmail(SurmesureForm surmesureForm) {
+    public void sendConfirmationEmail(ParticularForm particularForm) {
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             @Override
             public void prepare(MimeMessage mimeMessage) throws Exception {
-                mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(surmesureForm.getEmail()));
-                mimeMessage.setSubject("Confirmation de votre demande sur mesure - Omni365 SaaS");
+                mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(particularForm.getPersonalEmail()));
+                mimeMessage.setSubject("Confirmation de votre demande particuler - Omni365 SaaS");
 
                 MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-                String emailContent = buildConfirmationEmailTemplate(surmesureForm);
+                String emailContent = buildConfirmationEmailTemplate(particularForm);
                 helper.setText(emailContent, true);
             }
         };
 
         try {
             emailSender.send(preparator);
-            logger.info("Confirmation email sent successfully to: {}", surmesureForm.getEmail());
+            logger.info("Confirmation email sent successfully to: {}", particularForm.getPersonalEmail());
         } catch (Exception e) {
-            logger.error("Error sending confirmation email to: {}", surmesureForm.getEmail(), e);
+            logger.error("Error sending confirmation email to: {}", particularForm.getPersonalEmail(), e);
             throw e;
         }
     }
 
-    private String buildConfirmationEmailTemplate(SurmesureForm surmesureForm) {
+    private String buildConfirmationEmailTemplate(ParticularForm particularForm) {
         return "<!DOCTYPE html>" +
                 "<html lang=\"fr\">" +
                 "<head>" +
@@ -208,8 +206,8 @@ public class SurMesureEmailService {
                 "        </div>" +
                 "        <div class=\"content\">" +
                 "            <div class=\"thank-you\">" +
-                "                <h2>Merci, " + escapeHtml(surmesureForm.getFullName()) + " !</h2>" +
-                "                <p>Nous avons bien reçu votre demande de configuration <strong>sur mesure</strong> pour <strong>" + escapeHtml(surmesureForm.getEnterpriseName()) + "</strong>.</p>" +
+                "                <h2>Merci, " + escapeHtml(particularForm.getLastName())+ " " + escapeHtml(particularForm.getFirstName()) + " !</h2>" +
+                "                <p>Nous avons bien reçu votre demande de configuration <strong>particulier</strong> pour <strong>" + escapeHtml(particularForm.getNameAccount()) + "</strong>.</p>" +
                 "            </div>" +
                 "            " +
                 "            <div class=\"highlight\">" +
@@ -219,8 +217,8 @@ public class SurMesureEmailService {
                 "            " +
                 "            <div class=\"info-card\">" +
                 "                <div class=\"info-label\">RÉSUMÉ DE VOTRE DEMANDE SUR MESURE</div>" +
-                "                <div class=\"info-value\"><strong>Entreprise:</strong> " + escapeHtml(surmesureForm.getEnterpriseName()) + "</div>" +
-                "                <div class=\"info-value\"><strong>Nombre de comptes:</strong> " + surmesureForm.getAccountNumber() + "</div>" +
+                "                <div class=\"info-value\"><strong>Nom de Compte:</strong> " + escapeHtml(particularForm.getNameAccount()) + "</div>" +
+                "                <div class=\"info-value\"><strong>Numero de Telephone:</strong> " + particularForm.getPhoneNumber() + "</div>" +
                 "                <div class=\"info-value\"><strong>Référence:</strong> OMNI-SM-" + System.currentTimeMillis() + "</div>" +
                 "            </div>" +
                 "            " +
@@ -246,7 +244,7 @@ public class SurMesureEmailService {
                 "            " +
                 "            <div class=\"message-section\">" +
                 "                <p><strong>Votre message :</strong></p>" +
-                "                <p>\"" + escapeHtml(surmesureForm.getMessage()) + "\"</p>" +
+                "                <p>\"" + escapeHtml(particularForm.getMessage()) + "\"</p>" +
                 "            </div>" +
                 "            " +
                 "            <div style=\"text-align: center; margin-top: 25px;\">" +

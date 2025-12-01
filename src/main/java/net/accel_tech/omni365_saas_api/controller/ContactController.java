@@ -7,6 +7,7 @@ import net.accel_tech.omni365_saas_api.entity.ContactForm;
 import net.accel_tech.omni365_saas_api.exception.ResourceNotFoundException;
 import net.accel_tech.omni365_saas_api.message.Message;
 import net.accel_tech.omni365_saas_api.repository.ContactFormRepository;
+import net.accel_tech.omni365_saas_api.service.ContactFormService;
 import net.accel_tech.omni365_saas_api.service.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,20 +30,26 @@ public class ContactController {
 
 	private final EmailService emailService;
 	private final ContactFormRepository contactFormRepository;
+	private final ContactFormService contactFormService;
+
 
 	/**
 	 * @url http://localhost:8080/api/contacts
 	 * @return
 	 */
-	@PostMapping("")
-	public ResponseEntity<?> sendEmail(@Valid @RequestBody ContactForm contactForm) {
+	@PostMapping
+	public ResponseEntity<?> submitContactForm(@Valid @RequestBody ContactForm contactForm) {
 
-		ContactForm savedForm = emailService.save(contactForm);
+		contactFormService.processContactForm(contactForm);
 
-		emailService.send(savedForm);
-
-		return new ResponseEntity<>(new Message("Demande enregistrée et email envoyé avec succès"), HttpStatus.CREATED);
+		return new ResponseEntity<>(
+				new ApiResponse<>(
+						true,
+						new Message("Demande enregistrée et email envoyés avec succès")),
+				HttpStatus.CREATED
+		);
 	}
+
 
 	@GetMapping("")
 	public ResponseEntity<?> findAllContacts(){
