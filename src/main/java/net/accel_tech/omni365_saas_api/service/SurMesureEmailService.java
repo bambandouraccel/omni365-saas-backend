@@ -1,15 +1,13 @@
 package net.accel_tech.omni365_saas_api.service;
 
-import jakarta.mail.Message;
-import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import net.accel_tech.omni365_saas_api.entity.SurmesureForm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -18,43 +16,66 @@ import org.springframework.stereotype.Service;
  **/
 
 @Service
+@RequiredArgsConstructor
 public class SurMesureEmailService {
 
     Logger logger = LogManager.getLogger(SurMesureEmailService.class);
 
     private final JavaMailSender emailSender;
 
-    public SurMesureEmailService(JavaMailSender emailSender) {
-        this.emailSender = emailSender;
-    }
-
     @Value("${spring.mail.username}")
-    private String emailTo;
+    private String emailFrom; // RENOMMÉ : c'est l'expéditeur
+
+    @Value("${admin.email:support@omail.africa}")
+    private String adminEmail; // Destinataire admin
 
     @Async
     public void send(SurmesureForm surmesureForm) {
-
-        // prepare email format
-        MimeMessagePreparator preparator = new MimeMessagePreparator() {
-
-            @Override
-            public void prepare(MimeMessage mimeMessage) throws Exception {
-                mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
-                mimeMessage.setSubject("Nouvelle Demande de Configuration sur mesure - " + surmesureForm.getEnterpriseName());
-
-                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
-                String emailContent = buildEmailTemplate(surmesureForm);
-                helper.setText(emailContent, true);
-            }
-        };
-
         try {
-            emailSender.send(preparator);
-            logger.info("Email sent with success.");
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            // DÉFINIR L'EXPÉDITEUR (CRITIQUE)
+            helper.setFrom(emailFrom);
+
+            // DESTINATAIRE : l'admin
+            helper.setTo(adminEmail);
+            helper.setSubject("Nouvelle Demande de Configuration Omni365 Sur Mesure - " + surmesureForm.getEnterpriseName());
+
+            String emailContent = buildEmailTemplate(surmesureForm);
+            helper.setText(emailContent, true);
+
+            emailSender.send(mimeMessage);
+            logger.info("Email sur mesure envoyé avec succès à l'admin : {}", adminEmail);
+
         } catch (Exception e) {
-            logger.error("Error sending email.", e);
-            throw e;
+            logger.error("Erreur lors de l'envoi de l'email sur mesure.", e);
+            throw new RuntimeException("Erreur d'envoi d'email sur mesure", e);
+        }
+    }
+
+    @Async
+    public void sendConfirmationEmail(SurmesureForm surmesureForm) {
+        try {
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            // DÉFINIR L'EXPÉDITEUR (CRITIQUE)
+            helper.setFrom(emailFrom);
+
+            // DESTINATAIRE : l'utilisateur qui a soumis le formulaire
+            helper.setTo(surmesureForm.getEmail());
+            helper.setSubject("Confirmation de votre demande Sur Mesure - Omni365");
+
+            String emailContent = buildConfirmationEmailTemplate(surmesureForm);
+            helper.setText(emailContent, true);
+
+            emailSender.send(mimeMessage);
+            logger.info("Email de confirmation sur mesure envoyé avec succès à : {}", surmesureForm.getEmail());
+
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'envoi de l'email de confirmation sur mesure à : {}", surmesureForm.getEmail(), e);
+            throw new RuntimeException("Erreur d'envoi d'email de confirmation sur mesure", e);
         }
     }
 
@@ -91,7 +112,7 @@ public class SurMesureEmailService {
                 "<body>" +
                 "    <div class=\"container\">" +
                 "        <div class=\"header\">" +
-                "            <h1>Demande de configuration personnalisée - Omni365 SaaS</h1>" +
+                "            <h1>Demande de configuration Sur Mesure - Omni365</h1>" +
                 "            <p>Nouvelle demande reçue</p>" +
                 "        </div>" +
                 "        <div class=\"content\">" +
@@ -118,7 +139,6 @@ public class SurMesureEmailService {
                 "                </div>" +
                 "            </div>" +
                 "            " +
-                "            " +
                 "            <div class=\"message-section\">" +
                 "                <div class=\"message-label\">MESSAGE</div>" +
                 "                <div class=\"message-content\">" + escapeHtml(surmesureForm.getMessage()) + "</div>" +
@@ -131,30 +151,6 @@ public class SurMesureEmailService {
                 "    </div>" +
                 "</body>" +
                 "</html>";
-    }
-
-    @Async
-    public void sendConfirmationEmail(SurmesureForm surmesureForm) {
-        MimeMessagePreparator preparator = new MimeMessagePreparator() {
-            @Override
-            public void prepare(MimeMessage mimeMessage) throws Exception {
-                mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(surmesureForm.getEmail()));
-                mimeMessage.setSubject("Confirmation de votre demande sur mesure - Omni365 SaaS");
-
-                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
-                String emailContent = buildConfirmationEmailTemplate(surmesureForm);
-                helper.setText(emailContent, true);
-            }
-        };
-
-        try {
-            emailSender.send(preparator);
-            logger.info("Confirmation email sent successfully to: {}", surmesureForm.getEmail());
-        } catch (Exception e) {
-            logger.error("Error sending confirmation email to: {}", surmesureForm.getEmail(), e);
-            throw e;
-        }
     }
 
     private String buildConfirmationEmailTemplate(SurmesureForm surmesureForm) {
@@ -170,6 +166,7 @@ public class SurMesureEmailService {
                 "        .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }" +
                 "        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }" +
                 "        .header h1 { font-size: 24px; font-weight: 600; margin-bottom: 10px; }" +
+                "        .header p { font-size: 14px; opacity: 0.9; }" +
                 "        .content { padding: 30px; }" +
                 "        .info-card { background: #f0f4ff; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 20px; }" +
                 "        .info-label { font-size: 12px; color: #5d6fd8; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }" +
@@ -204,7 +201,7 @@ public class SurMesureEmailService {
                 "    <div class=\"container\">" +
                 "        <div class=\"header\">" +
                 "            <h1>Confirmation de Réception</h1>" +
-                "            <p>Votre demande sur mesure a bien été enregistrée</p>" +
+                "            <p>Votre demande de Sur Mesure a bien été enregistrée</p>" +
                 "        </div>" +
                 "        <div class=\"content\">" +
                 "            <div class=\"thank-you\">" +
@@ -244,15 +241,10 @@ public class SurMesureEmailService {
                 "                </div>" +
                 "            </div>" +
                 "            " +
-                "            <div class=\"message-section\">" +
-                "                <p><strong>Votre message :</strong></p>" +
-                "                <p>\"" + escapeHtml(surmesureForm.getMessage()) + "\"</p>" +
-                "            </div>" +
-                "            " +
                 "            <div style=\"text-align: center; margin-top: 25px;\">" +
                 "                <p><strong>Notre engagement :</strong></p>" +
                 "                <p>Nous mettons tout en œuvre pour comprendre vos besoins uniques et vous proposer la solution la plus adaptée.</p>" +
-                "                <p>Contactez-nous à <a href=\"mailto:omni365-support@heritage.africa\">omni365-support@heritage.africa</a></p>" +
+                "                <p>Contactez-nous à <a href=\"mailto:support@omail.africa\">support@omail.africa</a></p>" +
                 "            </div>" +
                 "        </div>" +
                 "        <div class=\"footer\">" +

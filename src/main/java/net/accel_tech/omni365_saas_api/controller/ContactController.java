@@ -3,7 +3,9 @@ package net.accel_tech.omni365_saas_api.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.accel_tech.omni365_saas_api.dto.ApiResponse;
+import net.accel_tech.omni365_saas_api.dto.ContactFormRequest;
 import net.accel_tech.omni365_saas_api.entity.ContactForm;
+import net.accel_tech.omni365_saas_api.entity.ParticularForm;
 import net.accel_tech.omni365_saas_api.exception.ResourceNotFoundException;
 import net.accel_tech.omni365_saas_api.message.Message;
 import net.accel_tech.omni365_saas_api.repository.ContactFormRepository;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,14 +41,22 @@ public class ContactController {
 	 * @return
 	 */
 	@PostMapping
-	public ResponseEntity<?> submitContactForm(@Valid @RequestBody ContactForm contactForm) {
+	public ResponseEntity<?> submitContactForm(@Valid @RequestBody ContactFormRequest request) {
 
-		contactFormService.processContactForm(contactForm);
+		ContactForm form = new ContactForm();
+		form.setEmail(request.getEmail());
+		form.setPhoneNumber(request.getPhoneNumber());
+		form.setFullName(request.getFullName());
+		form.setMessage(request.getMessage());
+		form.setAccountList(request.getAccountList());
+		form.setAccountNumber(request.getAccountNumber());
+		form.setDomainName(request.getDomainName());
+		form.setEnterpriseName(request.getEnterpriseName());
+		form.setCreatedAt(new Date());
+		ContactForm contactForm = contactFormService.processContactForm(form);
 
 		return new ResponseEntity<>(
-				new ApiResponse<>(
-						true,
-						new Message("Demande enregistrée et email envoyés avec succès")),
+				new ApiResponse<>(true, contactForm),
 				HttpStatus.CREATED
 		);
 	}

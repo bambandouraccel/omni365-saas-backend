@@ -3,6 +3,8 @@ package net.accel_tech.omni365_saas_api.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.accel_tech.omni365_saas_api.dto.ApiResponse;
+import net.accel_tech.omni365_saas_api.dto.SurMesureFormRequest;
+import net.accel_tech.omni365_saas_api.entity.ContactForm;
 import net.accel_tech.omni365_saas_api.entity.SurmesureForm;
 import net.accel_tech.omni365_saas_api.exception.ResourceNotFoundException;
 import net.accel_tech.omni365_saas_api.message.Message;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,16 +37,21 @@ public class SurMesureController {
      * @return
      */
     @PostMapping("")
-    public ResponseEntity<?> sendEmail(@Valid @RequestBody SurmesureForm surmesureForm) {
+    public ResponseEntity<?> sendEmail(@Valid @RequestBody SurMesureFormRequest request) {
 
-        SurmesureForm processedForm = surMesureFormService.processSurMesureForm(surmesureForm);
+        SurmesureForm form = new SurmesureForm();
+        form.setEmail(request.getEmail());
+        form.setPhoneNumber(request.getPhoneNumber());
+        form.setFullName(request.getFullName());
+        form.setMessage(request.getMessage());
+        form.setAccountNumber(request.getAccountNumber());
+        form.setEnterpriseName(request.getEnterpriseName());
+        form.setCreatedAt(new Date());
+        SurmesureForm processedForm = surMesureFormService.processSurMesureForm(form);
 
         return new ResponseEntity<>(
-                new ApiResponse<>(
-                        true,
-                        new Message("Demande sur mesure enregistrée et emails envoyés avec succès")),
-                HttpStatus.CREATED
-        );
+                new ApiResponse<>(true, processedForm),
+                HttpStatus.CREATED);
     }
 
 

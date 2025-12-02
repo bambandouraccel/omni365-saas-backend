@@ -14,7 +14,7 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidHeritageAfricaAccount {
-    String message() default "Invalid Gafa account name. " +
+    String message() default "Invalid Heritage Africa account name. " +
             "Must be 3-50 characters, letters, numbers, dots, underscores, hyphens only";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

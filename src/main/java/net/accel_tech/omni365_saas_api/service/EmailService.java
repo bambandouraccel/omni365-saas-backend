@@ -29,7 +29,10 @@ public class EmailService {
 	private final ContactFormRepository contactFormRepository;
 
 	@Value("${spring.mail.username}")
-	private String emailTo;
+	private String emailFrom; // RENOMMÉ : c'est l'expéditeur, pas le destinataire
+
+	@Value("${admin.email:support@omail.africa}") // Ajoutez cette propriété
+	private String adminEmail; // Le vrai destinataire admin
 
 	public ContactForm save(ContactForm contactForm) {
 		return contactFormRepository.save(contactForm);
@@ -43,7 +46,11 @@ public class EmailService {
 
 			@Override
 			public void prepare(MimeMessage mimeMessage) throws Exception {
-				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(emailTo));
+				// DÉFINIR L'EXPÉDITEUR CORRECTEMENT
+				mimeMessage.setFrom(new InternetAddress(emailFrom));
+
+				// DESTINATAIRE : l'admin, pas l'expéditeur
+				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(adminEmail));
 				mimeMessage.setSubject("Nouvelle Demande de Configuration - " + contactForm.getEnterpriseName());
 
 				MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -54,7 +61,7 @@ public class EmailService {
 		};
 		try {
 			emailSender.send(preparator);
-			logger.info("Email sent with success.");
+			logger.info("Email sent with success to admin: {}", adminEmail);
 		} catch (Exception e) {
 			logger.error("Error sending email.", e);
 			throw e;
@@ -94,7 +101,7 @@ public class EmailService {
 				"<body>" +
 				"    <div class=\"container\">" +
 				"        <div class=\"header\">" +
-				"            <h1>Demande de Configuration Omni365 SaaS</h1>" +
+				"            <h1>Demande de Configuration Omni365 pour TPE/PME</h1>" +
 				"            <p>Nouvelle demande reçue</p>" +
 				"        </div>" +
 				"        <div class=\"content\">" +
@@ -149,8 +156,12 @@ public class EmailService {
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
 			@Override
 			public void prepare(MimeMessage mimeMessage) throws Exception {
+				// DÉFINIR L'EXPÉDITEUR CORRECTEMENT
+				mimeMessage.setFrom(new InternetAddress(emailFrom));
+
+				// DESTINATAIRE : l'utilisateur qui a soumis le formulaire
 				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(contactForm.getEmail()));
-				mimeMessage.setSubject("Confirmation de votre demande - Omni365 SaaS");
+				mimeMessage.setSubject("Confirmation de votre demande TPE/PME - Omni365");
 
 				MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
@@ -290,7 +301,7 @@ public class EmailService {
 				"<body>" +
 				"    <div class=\"container\">" +
 				"        <div class=\"header\">" +
-				"            <h1>Votre demande a été bien enregistrée</h1>" +
+				"            <h1>Votre demande de TPE/PME a été bien enregistrée</h1>" +
 				"            <p>Votre aventure Omni365 commence maintenant</p>" +
 				"        </div>" +
 				"        <div class=\"content\">" +
@@ -311,7 +322,7 @@ public class EmailService {
 				"                <h3 style=\"text-align: center; color: #333; margin-bottom: 30px; font-size: 24px;\">🎯 C'est Parti !</h3>" +
 				"                " +
 				"                <div class=\"countdown-card\">" +
-				"                    <span class=\"rocket-icon\">Omni365 SaaS</span>" +
+				"                    <span class=\"rocket-icon\">Omni365</span>" +
 				"                    <div class=\"countdown-text\">Vos identifiants arrivent !</div>" +
 				"                    <div class=\"timer\">⏳ 24H MAX</div>" +
 				"                    <div style=\"font-size: 14px; opacity: 0.9;\">Préparez-vous à décoller !</div>" +
@@ -333,22 +344,17 @@ public class EmailService {
 				"                </div>" +
 				"            </div>" +
 				"            " +
-				"            <div class=\"message-section\">" +
-				"                <p style=\"font-weight: 600; color: #667eea; margin-bottom: 15px;\">💬 Votre message :</p>" +
-				"                <p style=\"font-style: italic; background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #667eea;\">\"" + escapeHtml(contactForm.getMessage()) + "\"</p>" +
-				"            </div>" +
-				"            " +
 				"            <div style=\"text-align: center; margin-top: 35px; padding: 25px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 15px;\">" +
 				"                <p style=\"font-weight: 600; color: #333; margin-bottom: 10px;\">❔ Une question ?</p>" +
 				"                <p style=\"font-size: 18px;\">" +
-				"                    <a href=\"mailto:omni365-support@heritage.africa\" style=\"color: #667eea; text-decoration: none; font-weight: 700;\">" +
-				"                        📧 omni365-support@heritage.africa" +
+				"                    <a href=\"mailto:support@omail.africa\" style=\"color: #667eea; text-decoration: none; font-weight: 700;\">" +
+				"                        📧 support@omail.africa" +
 				"                    </a>" +
 				"                </p>" +
 				"            </div>" +
 				"        </div>" +
 				"        <div class=\"footer\">" +
-				"            <div class=\"logo\">Omni365 SaaS</div>" +
+				"            <div class=\"logo\">Omni365</div>" +
 				"            <p>Votre succès, notre mission ✨</p>" +
 				"            <p style=\"opacity: 0.8; margin-top: 10px;\">&copy; 2025 Omni365 SaaS. Prêt pour l'innovation !</p>" +
 				"        </div>" +
@@ -367,6 +373,4 @@ public class EmailService {
 				.replace("\"", "&quot;")
 				.replace("'", "&#39;");
 	}
-
-
 }

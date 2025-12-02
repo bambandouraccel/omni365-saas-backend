@@ -66,10 +66,7 @@ public class ParticularFormService {
         }
 
         // Vérifier les domaines invalides
-        String lowerEmail = email.toLowerCase();
-        if (lowerEmail.endsWith("@gafa.com")) {
-            throw new BadRequestException("Personal email cannot be a Gafa email. Please use your personal email address");
-        }
+
     }
 
     private void validateAccountName(String accountName) {

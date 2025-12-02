@@ -7,7 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
  * @author NdourBamba18
  **/
 
-public class HeritageAfricaEmailValidator implements ConstraintValidator<ValidHeritageAfricaAccount, String> {
+public class HeritageAfricaEmailValidator  implements ConstraintValidator<ValidHeritageAfricaAccount, String> {
 
     @Override
     public void initialize(ValidHeritageAfricaAccount constraintAnnotation) {

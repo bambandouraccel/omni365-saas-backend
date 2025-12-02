@@ -40,7 +40,7 @@ public class ParticularForm implements Serializable {
     @NotBlank(message = "Personal Email field is required!")
     @Size(max = 180)
     @Email(message = "Please, enter a valid email address.")
-    @Column(name = "personalEmail", unique = true) // Changer le nom de la colonne
+    @Column(name = "personalEmail", unique = true)
     private String personalEmail;
 
     @NotBlank(message = "Phone Number field is required!")
@@ -61,7 +61,7 @@ public class ParticularForm implements Serializable {
     private String nameAccount;
 
     @Transient // Ce champ n'est pas persisté en base
-    private String fullAccountEmail; // Pour stocker le compte complet avec @gafa.com
+    private String fullAccountEmail; // Pour stocker le compte complet avec @heritage.africa
 
     @Column(name = "createdAt", nullable = false)
     @CreationTimestamp
@@ -75,7 +75,7 @@ public class ParticularForm implements Serializable {
     // Méthode pour générer l'email complet Gafa
     public String getFullAccountEmail() {
         if (nameAccount != null && !nameAccount.trim().isEmpty()) {
-            return nameAccount.toLowerCase().trim() + "@heritage.africa";
+            return nameAccount.toLowerCase().trim() + "@omail.africa";
         }
         return null;
     }
@@ -85,8 +85,8 @@ public class ParticularForm implements Serializable {
     @PreUpdate
     public void formatNameAccount() {
         if (nameAccount != null) {
-            // Supprimer @gafa.com s'il est déjà présent pour éviter les doublons
-            nameAccount = nameAccount.replace("@heritage.africa", "");
+            // Supprimer @heritage.africa s'il est déjà présent pour éviter les doublons
+            nameAccount = nameAccount.replace("@omail.africa", "");
             // Supprimer les espaces et mettre en minuscule
             nameAccount = nameAccount.trim().toLowerCase();
 
