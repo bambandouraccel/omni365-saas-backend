@@ -8,7 +8,7 @@ RUN mvn clean package -DskipTests
 FROM docker.io/library/eclipse-temurin:17-jre-jammy AS runtime
 WORKDIR /app
 
-# Create a non-root user for OpenShift
+# Create a non-root user for Openshift
 RUN useradd -u 1001 -r -g 0 -d /app -s /sbin/nologin -c "App user" appuser && \
     chmod -R g+rwX /app
 
