@@ -1,14 +1,14 @@
 # Étape de build
-FROM maven:3.8.6-eclipse-temurin-17 AS builder
+FROM docker.io/maven:3.8.6-eclipse-temurin-17 AS builder
 WORKDIR /build
 COPY . .
 RUN mvn clean package -DskipTests
 
 # Étape d'exécution
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM docker.io/eclipse-temurin:17-jre-jammy AS runtime
 WORKDIR /app
 
-# Create a non-root user for OpenShift
+# Create a non-root user for Openshift
 RUN useradd -u 1001 -r -g 0 -d /app -s /sbin/nologin -c "App user" appuser && \
     chmod -R g+rwX /app
 
