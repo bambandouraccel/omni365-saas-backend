@@ -66,7 +66,11 @@ public class ParticularFormService {
         }
 
         // Vérifier les domaines invalides
-
+        String lowerEmail = email.toLowerCase();
+        if (lowerEmail.endsWith("@heritage.africa")) {
+            throw new BadRequestException("Personal email cannot be a Heritage email. " +
+                    "Please use your personal email address");
+        }
     }
 
     private void validateAccountName(String accountName) {

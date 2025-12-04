@@ -21,9 +21,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class ContactEmailService {
 
-	Logger logger = LogManager.getLogger(EmailService.class);
+	Logger logger = LogManager.getLogger(ContactEmailService.class);
 
 	private final JavaMailSender emailSender;
 	private final ContactFormRepository contactFormRepository;
@@ -31,8 +31,9 @@ public class EmailService {
 	@Value("${spring.mail.username}")
 	private String emailFrom; // RENOMMÉ : c'est l'expéditeur, pas le destinataire
 
-	@Value("${admin.email:support@omail.africa}") // Ajoutez cette propriété
-	private String adminEmail; // Le vrai destinataire admin
+	//@Value("${admin.email:support@omail.africa}")
+	@Value("${admin.email}")
+	private String adminEmail;
 
 	public ContactForm save(ContactForm contactForm) {
 		return contactFormRepository.save(contactForm);

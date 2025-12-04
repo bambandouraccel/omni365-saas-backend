@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContactFormService {
 
     private final ContactFormRepository contactFormRepository;
-    private final EmailService emailService;
+    private final ContactEmailService emailService;
 
     @Transactional
     public ContactForm processContactForm(ContactForm contactForm) {
@@ -53,10 +53,10 @@ public class ContactFormService {
         }
 
         // Vérifier les domaines invalides
-        /*String lowerEmail = email.toLowerCase();
+        String lowerEmail = email.toLowerCase();
         if (lowerEmail.endsWith("@heritage.africa")) {
             throw new BadRequestException("Personal email cannot be a Heritage email. " +
                     "Please use your personal email address");
-        }*/
+        }
     }
 }

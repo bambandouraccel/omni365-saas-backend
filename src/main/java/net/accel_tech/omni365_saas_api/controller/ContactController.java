@@ -5,12 +5,11 @@ import lombok.RequiredArgsConstructor;
 import net.accel_tech.omni365_saas_api.dto.ApiResponse;
 import net.accel_tech.omni365_saas_api.dto.ContactFormRequest;
 import net.accel_tech.omni365_saas_api.entity.ContactForm;
-import net.accel_tech.omni365_saas_api.entity.ParticularForm;
 import net.accel_tech.omni365_saas_api.exception.ResourceNotFoundException;
 import net.accel_tech.omni365_saas_api.message.Message;
 import net.accel_tech.omni365_saas_api.repository.ContactFormRepository;
 import net.accel_tech.omni365_saas_api.service.ContactFormService;
-import net.accel_tech.omni365_saas_api.service.EmailService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ContactController {
 
-	private final EmailService emailService;
 	private final ContactFormRepository contactFormRepository;
 	private final ContactFormService contactFormService;
 
@@ -43,6 +41,7 @@ public class ContactController {
 	@PostMapping
 	public ResponseEntity<?> submitContactForm(@Valid @RequestBody ContactFormRequest request) {
 
+		// Convert from DTO to Entity
 		ContactForm form = new ContactForm();
 		form.setEmail(request.getEmail());
 		form.setPhoneNumber(request.getPhoneNumber());
@@ -53,6 +52,7 @@ public class ContactController {
 		form.setDomainName(request.getDomainName());
 		form.setEnterpriseName(request.getEnterpriseName());
 		form.setCreatedAt(new Date());
+
 		ContactForm contactForm = contactFormService.processContactForm(form);
 
 		return new ResponseEntity<>(

@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.accel_tech.omni365_saas_api.dto.ApiResponse;
 import net.accel_tech.omni365_saas_api.dto.SurMesureFormRequest;
-import net.accel_tech.omni365_saas_api.entity.ContactForm;
 import net.accel_tech.omni365_saas_api.entity.SurmesureForm;
 import net.accel_tech.omni365_saas_api.exception.ResourceNotFoundException;
 import net.accel_tech.omni365_saas_api.message.Message;
@@ -39,6 +38,7 @@ public class SurMesureController {
     @PostMapping("")
     public ResponseEntity<?> sendEmail(@Valid @RequestBody SurMesureFormRequest request) {
 
+        // Convert from DTO to Entity
         SurmesureForm form = new SurmesureForm();
         form.setEmail(request.getEmail());
         form.setPhoneNumber(request.getPhoneNumber());

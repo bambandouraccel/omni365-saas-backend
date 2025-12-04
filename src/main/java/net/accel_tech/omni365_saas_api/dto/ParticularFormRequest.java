@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @author NdourBamba18
  **/
@@ -42,4 +44,6 @@ public class ParticularFormRequest {
     @Pattern(regexp = "^[a-zA-Z0-9._-]+$",
             message = "Account name can only contain letters, numbers, dots, underscores and hyphens")
     private String nameAccount;
+
+    private Date createdAt;
 }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ public class ParticularController {
     public ResponseEntity<ApiResponse<ParticularForm>> submitParticularForm(
             @Valid @RequestBody ParticularFormRequest request) {
 
-        // Convertir le DTO en Entity
+        // Convert from DTO to Entity
         ParticularForm form = new ParticularForm();
         form.setFirstName(request.getFirstName());
         form.setLastName(request.getLastName());
@@ -45,6 +46,7 @@ public class ParticularController {
         form.setPhoneNumber(request.getPhoneNumber());
         form.setMessage(request.getMessage());
         form.setNameAccount(request.getNameAccount());
+        form.setCreatedAt(new Date());
 
         ParticularForm processedForm = particularFormService.processParticularForm(form);
 

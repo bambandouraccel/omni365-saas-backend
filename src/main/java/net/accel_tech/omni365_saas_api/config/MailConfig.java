@@ -1,5 +1,6 @@
 package net.accel_tech.omni365_saas_api.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,26 +13,30 @@ import java.util.Properties;
  **/
 
 @Configuration
+@RequiredArgsConstructor
 public class MailConfig {
+
+    private final MailProperties mailProperties;
 
     @Bean
     public JavaMailSender javaMailSender() {
+
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        // Configuration directe - pas de variables
-        mailSender.setHost("smtp.heritage.africa");
-        mailSender.setPort(587);
-        mailSender.setUsername("support@omail.africa");
-        mailSender.setPassword("Horizon@2027");
+        // Configuration via les propriétés
+        mailSender.setHost(mailProperties.getHost());
+        mailSender.setPort(mailProperties.getPort());
+        mailSender.setUsername(mailProperties.getUsername());
+        mailSender.setPassword(mailProperties.getPassword());
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.starttls.required", "true");
+        props.put("mail.smtp.auth", String.valueOf(mailProperties.isSmtpAuth()));
+        props.put("mail.smtp.starttls.enable", String.valueOf(mailProperties.isSmtpStarttlsEnable()));
+        props.put("mail.smtp.starttls.required", String.valueOf(mailProperties.isSmtpStarttlsRequired()));
 
-        // FORCER l'adresse FROM
-        props.put("mail.smtp.from", "support@omail.africa");
+        // FORCER l'adresse FROM depuis les propriétés
+        props.put("mail.smtp.from", mailProperties.getFrom());
 
         // Timeouts
         props.put("mail.smtp.connectiontimeout", "15000");

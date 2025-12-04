@@ -26,7 +26,8 @@ public class SurMesureEmailService {
     @Value("${spring.mail.username}")
     private String emailFrom; // RENOMMÉ : c'est l'expéditeur
 
-    @Value("${admin.email:support@omail.africa}")
+    //@Value("${admin.email:support@omail.africa}")
+    @Value("${admin.email}")
     private String adminEmail; // Destinataire admin
 
     @Async
