@@ -71,6 +71,13 @@ public class ParticularFormService {
             throw new BadRequestException("Personal email cannot be a Heritage email. " +
                     "Please use your personal email address");
         }
+
+        // Vérifier les domaines invalides
+        String lowerEmailAccel = email.toLowerCase();
+        if (lowerEmailAccel.endsWith("@accel-tech.net")) {
+            throw new BadRequestException("Personal email cannot be a Accel Tech email. " +
+                    "Please use your personal email address");
+        }
     }
 
     private void validateAccountName(String accountName) {
